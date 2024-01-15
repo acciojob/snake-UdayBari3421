@@ -1,106 +1,81 @@
-//board
-let blocksize = 10;
-let rows = 40.0;
-let column = 40.0;
-let board;
-let context;
-let count = 0;
+document.addEventListener("DOMContentLoaded", () => {
+    const gameContainer = document.getElementById("gameContainer");
+    const scoreElement = document.getElementById("score");
 
-//snake
-let snakeX = blocksize * 20.0;
-let snakeY = blocksize * 20.0;
+    const pixelSize = 40;
+    const containerSize = 400;
+    const totalPixels = containerSize / pixelSize;
 
-let velocityX = 0.0;
-let velocityY = 0.0;
+    const snake = [{ row: 20, col: 1 }];
+    let direction = "right";
+    let food = {};
+    let score = 0;
 
-var snakebody = [];
-
-// food
-let foodX = 0;
-let foodY = 0;
-
-
-let gameover = false;
-
-
-window.onload = function () {
-    board = document.getElementById("gamecontainer")
-    board.height = rows * blocksize;
-    board.width = column * blocksize;
-    context = board.getContext("2d")
-
-    placefood();
-    document.addEventListener("keyup", changeDirection);
-    // update();
-    setInterval(update, 1000 / 8)
-}
-function update() {
-    context.fillStyle = "black";
-    context.fillRect(0, 0, board.width, board.height);
-
-    context.fillStyle = "red";
-    context.fillRect(foodX, foodY, blocksize, blocksize);
-
-    if (snakeX == foodX && snakeY == foodY) {
-        snakebody.push([foodX, foodY])
-        placefood();
-        count++;
-        document.getElementById("score").innerHTML = count;
+    function createPixel(id, className) {
+        const pixel = document.createElement("div");
+        pixel.id = "pixel" + id;
+        pixel.className = className;
+        return pixel;
     }
 
-    for (let i = snakebody.length - 1; i > 0; i--) {
-        snakebody[i] = snakebody[i - 1];
-    }
-    if (snakebody.length) {
-        snakebody[0] = [snakeX, snakeY];
-    }
+    function createFood() {
+        const foodRow = Math.floor(Math.random() * totalPixels);
+        const foodCol = Math.floor(Math.random() * totalPixels);
+        const foodId = foodRow * totalPixels + foodCol;
 
-    context.fillStyle = "white";
-    snakeX += velocityX * blocksize;
-    snakeY += velocityY * blocksize;
-    context.fillRect(snakeX, snakeY, blocksize, blocksize);
-
-    for (var i = 0; i < snakebody.length; i++) {
-        context.fillRect(snakebody[i][0], snakebody[i][1], blocksize, blocksize);
-    }
-
-    //gameover conditon
-    if (snakeX < 0 || snakeX > column * blocksize || snakeY < 0 || snakeY > rows * blocksize) {
-        gameover = true;
-        // alert("gameOver")
-       // update();
-    }
-
-    for (let i = 0; i < snakebody.length; i++) {
-        if (snakeX == snakebody[i][0] && snakeY == snakebody[i][1]) {
-            // alert('gameOver');
-           // update();
+        if (snake.some((pixel) => pixel.row === foodRow && pixel.col === foodCol)) {
+            return createFood();
         }
+
+        food = { row: foodRow, col: foodCol };
+        const foodPixel = createPixel(foodId, "pixel food");
+        gameContainer.appendChild(foodPixel);
     }
 
-}
+    function updateSnake() {
+        const head = Object.assign({}, snake[0]);
 
-function changeDirection(e) {
-    if (e.code == "ArrowUp" && velocityY != 1) {
-        velocityX = 0;
-        velocityY = -1;
-    }
-    else if (e.code == "ArrowDown" && velocityY != -1) {
-        velocityX = 0;
-        velocityY = 1;
-    }
-    if (e.code == "ArrowLeft" && velocityX != 1) {
-        velocityX = -1;
-        velocityY = 0;
-    }
-    if (e.code == "ArrowRight" && velocityX != -1) {
-        velocityX = 1;
-        velocityY = 0;
-    }
-}
+        switch (direction) {
+            case "up":
+                head.row--;
+                break;
+            case "down":
+                head.row++;
+                break;
+            case "left":
+                head.col--;
+                break;
+            case "right":
+                head.col++;
+                break;
+        }
 
-// placing food at random places
-function placefood() {
-    foodX = Math.floor(Math.random(0.0) * column) * blocksize;
-    foodY = Math.floor(Math.random(0.0) * rows) * blocksize
-}
+        if (head.row < 0 || head.row >= totalPixels || head.col < 0 || head.col >= totalPixels) {
+            gameOver();
+            return;
+        }
+
+        if (snake.some((pixel) => pixel.row === head.row && pixel.col === head.col)) {
+            gameOver();
+            return;
+        }
+
+        snake.unshift(head);
+
+        if (head.row === food.row && head.col === food.col) {
+            score++;
+            scoreElement.innerText = score;
+            gameContainer.removeChild(document.getElementById("pixel" + (food.row * totalPixels + food.col)));
+            createFood();
+        } else {
+            const tail = snake.pop();
+            document.getElementById("pixel" + (tail.row * totalPixels + tail.col)).classList.remove("snakeBodyPixel");
+        }
+
+        const headPixel = document.getElementById("pixel" + (head.row * totalPixels + head.col));
+        headPixel.classList.add("snakeBodyPixel");
+    }
+
+    function changeDirection(event) {
+        const key = event.keyCode;
+        if (key === 37 && direction !== "
