@@ -7,16 +7,29 @@
 </head>
 
 <body>
-
-	<div id="gameContainer">
-  <!-- Dynamically generate the pixels -->
-</div>
-<div class="scoreBoard">
-  Score: <span id="score">0</span>
-</div>
 	<!-- the entire body must be written by student -->
-    <script type="text/javascript" src="./script.js">
-</script>
+	<div id="gameContainer"></div>
+
+
+	<!-- #scoreContainer contains the scores -->
+	<div id="scoreContainer">
+		<div class="scoreBoard">Your Score: <span id="pointsEarned">0</span></div>
+	</div>
+
+
+	<!-- #onScreenControllers contains the navigation buttons for mobile screens -->
+	<div id="onScreenControllers">
+		<button id="leftButton">◀</button>
+		<div>
+			<button id="upButton">🔼</button>
+			<button id="downButton">🔽</button>
+		</div>
+		<button id="rightButton">▶</button>
+	</div>
+
+
+	<script type="text/javascript" src="./script.js">
+	</script>
 
 </body>
 
